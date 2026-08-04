@@ -6,6 +6,8 @@ import { DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import Swal from 'sweetalert2';
 
+declare var Razorpay: any;
+
 @Component({
   selector: 'app-addmeetings',
   templateUrl: './addmeetings.component.html',
@@ -43,6 +45,12 @@ export class AddmeetingsComponent {
   denomation: any;
   ministryname: any;
   from_id: any;
+  imagesDatains: any;
+  paymentCompleted = false;
+  paymentInProgress = false;
+  paymentId = '';
+  readonly meetingPaymentAmount = 100;
+  readonly razorpayKeyId = 'rzp_test_your_key_id_here';
 
   constructor(private formBuilder: FormBuilder, private service: ServiceService, private modalService: NgbModal, private route: ActivatedRoute, private router: Router) {
 
@@ -441,9 +449,11 @@ getbelivers() {
 
   postmeetings() {
     this.submitted = true;
-    
+
     if (this.addingmeetings.invalid) {
       Swal.fire('* మార్క్ చేసిన వివరాలను తప్పనిసరిగా పూరించాలి');
+    } else if (!this.paymentCompleted) {
+      Swal.fire('ముందుగా పేమెంట్ పూర్తి చేయండి');
     } else {
       this.showSpinner = true;
       var data = {
@@ -475,6 +485,9 @@ getbelivers() {
         facebook: this.addingmeetings.value.facebook,
         youtube: this.addingmeetings.value.youtube,
         ministry_id: this.addingmeetings.value.ministry_id,
+        payment_status: 'paid',
+        payment_amount: this.meetingPaymentAmount,
+        payment_id: this.paymentId,
         reviewImg: this.imagesData
       }
 console.log(data);
@@ -486,6 +499,8 @@ console.log(data);
           this.imagesData = [];
           this.submitted = false;
           this.showSpinner = false;
+          this.paymentCompleted = false;
+          this.paymentId = '';
         } else {
           alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి')
         }
@@ -494,8 +509,81 @@ console.log(data);
           this.showSpinner = false;
         }
       )
+
     }
-   
+  }
+
+  openMeetingPayment() {
+    this.submitted = true;
+
+    if (this.addingmeetings.invalid) {
+      Swal.fire('* మార్క్ చేసిన వివరాలను తప్పనిసరిగా పూరించాలి');
+      return;
+    }
+
+    this.paymentInProgress = true;
+    this.loadRazorpayScript().then((loaded) => {
+      if (!loaded) {
+        this.paymentInProgress = false;
+        Swal.fire('Razorpay లోడ్ కాలేదు, తరువాత మళ్లీ ప్రయత్నించండి');
+        return;
+      }
+
+      const options = {
+        key: this.razorpayKeyId,
+        amount: this.meetingPaymentAmount * 100,
+        currency: 'INR',
+        name: 'JBAC Meetings',
+        description: 'Meeting submission payment',
+        notes: {
+          meetingType: this.addingmeetings.value.mettingtype,
+          organizer: this.addingmeetings.value.orgname
+        },
+        prefill: {
+          name: this.addingmeetings.value.orgname,
+          contact: this.addingmeetings.value.orgphone,
+          email: sessionStorage.getItem('mail') || ''
+        },
+        theme: {
+          color: '#fb0404'
+        },
+        handler: (response: any) => {
+          this.paymentCompleted = true;
+          this.paymentId = response.razorpay_payment_id;
+          this.paymentInProgress = false;
+          Swal.fire('Payment successful. Submit button is now enabled.');
+        },
+        modal: {
+          ondismiss: () => {
+            this.paymentInProgress = false;
+          }
+        }
+      };
+
+      const razorpayInstance = new Razorpay(options);
+      razorpayInstance.open();
+    });
+  }
+
+  private loadRazorpayScript(): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (typeof Razorpay !== 'undefined') {
+        resolve(true);
+        return;
+      }
+
+      const existingScript = document.querySelector('script[src="https://checkout.razorpay.com/v1/checkout.js"]');
+      if (existingScript) {
+        resolve(true);
+        return;
+      }
+
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.onload = () => resolve(true);
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
   }
 
   getdenomations() {
@@ -546,38 +634,7 @@ console.log(data);
     }
     this.showSpinner = false;
   }
-  imagesDatains: any
 
-  postadds() {
-    this.submitted = true;
-    this.showSpinner = true;
-    if (this.addsadding.invalid) {
-      Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
-    } else {
-      var data = {
-        type: this.addsadding.value.type,
-        title: this.addsadding.value.title,
-        description: this.addsadding.value.description,
-        number: this.addsadding.value.number,
-        usr_id: sessionStorage.getItem('usr_id'),
-        reviewImg: this.imagesData
-      }
-      this.service.postadds(data).subscribe((res: any) => {
-        if (res.status == 200) {
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు')
-          this.addsadding.reset();
-          this.imagesData = [];
-          this.submitted = false;
-          this.showSpinner = false;
-        } else {
-          alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి')
-        }
-      },
-        error => {
-        })
-    }
-    this.showSpinner = false;
-  }
   postbusiness() {
     this.submitted = true;
     this.showSpinner = true;

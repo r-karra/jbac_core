@@ -977,26 +977,29 @@
                                         </div>
                                     </div>
                                     <br>
-                                    <!-- <div class="row">
+                                    <div class="row">
                                        
                                         <div class="col-md-6 mb-4 pb-2">
                                             <div class="form-outline">
-                                                <label class="form-label">Set Password (Minimum Length :4 )<span
+                                                <label class="form-label">Set Password (Minimum Length :6 )<span
                                                         style="color:red; -webkit-text-stroke-width:thick;">*</span></label>
                                                 <input type="password" formControlName="password" class="form-control"
-                                                    placeholder="ఇక్కడ క్లిక్ చేసి నమోదు చేయండి" minlength="4"
+                                                    placeholder="ఇక్కడ క్లిక్ చేసి నమోదు చేయండి" minlength="6"
                                                     [ngClass]="{'is-invalid': submitted && e['password'].errors }" />
                                                 <div *ngIf="submitted && e['password'].errors" class="invalid-feedback">
                                                     <div *ngIf="e['password'].errors['required']">Password setting is required
                                                     </div>
-                                                    <div *ngIf="e['password'].errors['minlength']">Password Minimum 4 Characters / Digits / Specialchracters</div>
+                                                    <div *ngIf="e['password'].errors['minlength']">Password Minimum 6 Characters</div>
                                                 </div>
                                             </div>
                                         </div> 
                                         <div class="col-md-6 mb-4 pb-2">
                                             <div class="form-outline">
                                                 <label class="form-label">Retype-Password<span
-                                                        style="color:red; -webkit-text-stroke-width:thick;">*</span></label>
+                                                        style="color:red; -webkit-text-stroke-width:thick;">*</span>
+                                                    <span *ngIf="e['retypepassword'].value && passwordsMatch" style="color:green; font-size:18px;">✓</span>
+                                                    <span *ngIf="e['retypepassword'].value && !passwordsMatch && e['retypepassword'].value.length >= 6" style="color:red; font-size:18px;">✗</span>
+                                                </label>
                                                 <input type="password" formControlName="retypepassword"
                                                     class="form-control" placeholder="ఇక్కడ క్లిక్ చేసి నమోదు చేయండి"
                                                     maxlength="16" minlength="6"
@@ -1006,12 +1009,15 @@
                                                     <div *ngIf="e['retypepassword'].errors['required']">Retype-Password
                                                         is required </div>
                                                     <div *ngIf="e['retypepassword'].errors['minlength']">Password
-                                                        between 6 to 16 Characters / Digits / Specialchracters</div>
+                                                        between 6 to 16 Characters</div>
+                                                </div>
+                                                <div *ngIf="e['retypepassword'].value && !passwordsMatch && e['retypepassword'].value.length >= 6" style="color:red; font-size:14px;">
+                                                    Password does not match!
                                                 </div>
                                             </div>
                                         </div> 
                                     </div>
-                                    <br> -->
+                                    <br>
                                     <!-- <div class="row">
 
                                         <div class="col-md-6 mb-4 pb-2">
@@ -1044,8 +1050,11 @@
                                     <div class="col-md-2 mb-4 pb-2">
                                     </div>
                                     <div class="col-md-2 mb-4 pb-2">
-                                        <button type="submit" (click)="poststudentsignup()"
-                                            class="default-btn  user-all-btn">సబ్మిట్ (SUBMIT)
+                                        <button type="button" (click)="poststudentsignup()"
+                                            [disabled]="!passwordsMatch || studentform.invalid"
+                                            [title]="!passwordsMatch ? 'Passwords do not match or are too short' : studentform.invalid ? 'Please fill all required fields' : 'Submit'"
+                                            class="default-btn  user-all-btn"
+                                            [style.opacity]="!passwordsMatch || studentform.invalid ? '0.5' : '1'">సబ్మిట్ (SUBMIT)
                                         </button>
                                     </div>
                                 </div>

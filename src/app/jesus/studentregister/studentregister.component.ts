@@ -90,11 +90,20 @@ export class StudentregisterComponent {
       mother: [''],
       orphon: [''],
       subcaste: [''],
-      gender: ['']
+      gender: [''],
+      password: ['', [Validators.required, Validators.minLength(6)]],
+      retypepassword: ['', [Validators.required, Validators.minLength(6)]]
 
     })
   }
   get e() { return this.studentform.controls; }
+
+  // Check if passwords match in real-time
+  get passwordsMatch(): boolean {
+    const pwd = this.studentform.get('password')?.value || '';
+    const repwd = this.studentform.get('retypepassword')?.value || '';
+    return pwd === repwd && pwd.length >= 6;
+  }
 
   name: any;
   usr_id: any;
@@ -592,8 +601,27 @@ export class StudentregisterComponent {
       return;
     }
 
-  
-    this.service.poststudentsignup(this.studentform.value)
+    const formValue = this.studentform.getRawValue();
+    // Validate password match on client before sending to server
+    const pwd = (formValue.password || '').trim();
+    const repwd = (formValue.retypepassword || '').trim();
+    
+    console.log('=== PASSWORD DEBUG ===');
+    console.log('Password length:', pwd.length, 'value:', pwd);
+    console.log('Retype-Password length:', repwd.length, 'value:', repwd);
+    console.log('Are they equal?', pwd === repwd);
+    console.log('Password bytes:', pwd.split('').map((c: string) => c.charCodeAt(0)));
+    console.log('Retype bytes:', repwd.split('').map((c: string) => c.charCodeAt(0)));
+    console.log('======================');
+    
+    if (pwd !== repwd) {
+      this.showSpinner = false;
+      this.showAlert('warning', 'గమనిక!', `Passwords do not match!\n\nPassword: ${pwd}\nRetype: ${repwd}`);
+      return;
+    }
+    
+    // Send the entire form value like other registration forms do
+    this.service.poststudentsignup(formValue)
       .pipe(finalize(() => this.showSpinner = false)) // Ensures spinner is hidden no matter what
       .subscribe(
         (res: any) => {
@@ -601,16 +629,81 @@ export class StudentregisterComponent {
             this.showAlert('success', 'నమోదు విజయవంతం', 'మీ ఫోన్ నంబర్‌కు సమాచారం పంపిస్తాము.');
             this.studentform.reset();
             this.submitted = false;
+          } else if (res?.status === 451) {
+            this.showAlert('warning', 'గమనిక!', 'ఈ ఫోన్ నంబర్‌తో ఇంతకుముందే నమోదు అయింది.');
           } else {
             this.showAlert('error', 'లోపం!', 'సర్వర్‌లో సమస్య ఉంది. దయచేసి మరలా ప్రయత్నించండి.');
           }
         },
         (error) => {
           console.error('Server Error:', error);
-          this.showAlert('error', 'లోపం!', 'Something went wrong, please try again later');
+          const statusCode = Number(error?.status ?? error?.error?.status);
+          const serverMessage =
+            error?.error?.message ||
+            error?.error?.msg ||
+            error?.message ||
+            '';
+          const rawError =
+            typeof error?.error === 'string'
+              ? error.error
+              : JSON.stringify(error?.error || {});
+
+          if (statusCode === 500) {
+            this.showSpinner = true;
+            this.service.postregform(this.buildFallbackEntryPayload(formValue))
+              .pipe(finalize(() => this.showSpinner = false))
+              .subscribe(
+                (fallbackRes: any) => {
+                  if (fallbackRes?.status === 200) {
+                    this.showAlert('success', 'నమోదు విజయవంతం', 'ప్రధాన సర్వర్ సమస్య కారణంగా మీ వివరాలు ప్రత్యామ్నాయంగా భద్రపరచబడ్డాయి.');
+                    this.studentform.reset();
+                    this.submitted = false;
+                    return;
+                  }
+
+                  this.showAlert('error', 'లోపం!', `సమర్పణలో సమస్య వచ్చింది (కోడ్: ${statusCode}). ${serverMessage || rawError || ''}`);
+                },
+                () => {
+                  this.showAlert('error', 'లోపం!', `సమర్పణలో సమస్య వచ్చింది (కోడ్: ${statusCode}). ${serverMessage || rawError || ''}`);
+                }
+              );
+            return;
+          }
+
+          if (statusCode === 451) {
+            this.showAlert('warning', 'గమనిక!', 'ఈ ఫోన్ నంబర్‌తో ఇంతకుముందే నమోదు అయింది.');
+            return;
+          }
+
+          if (typeof serverMessage === 'string' && /already|exist|duplicate/i.test(serverMessage)) {
+            this.showAlert('warning', 'గమనిక!', 'ఈ ఫోన్ నంబర్‌తో ఇంతకుముందే నమోదు అయింది.');
+            return;
+          }
+
+          const errorText = statusCode
+            ? `సమర్పణలో సమస్య వచ్చింది (కోడ్: ${statusCode}). ${serverMessage || rawError || ''}`
+            : 'సమర్పణలో సమస్య వచ్చింది, దయచేసి మరలా ప్రయత్నించండి.';
+
+          this.showAlert('error', 'లోపం!', errorText);
         }
       );
-    
+
+  }
+
+  private buildFallbackEntryPayload(formValue: any) {
+    return {
+      category: 'Student Registration',
+      name: formValue.studentname || '',
+      phnumber: formValue.number || '',
+      number: formValue.number || '',
+      whatsapnum: formValue.parentnum || formValue.number || '',
+      district_id: formValue.resdistricts || '',
+      constituency_id: formValue.resconstituencyname || '',
+      mandal_id: formValue.resmandals || '',
+      village_id: formValue.respanchayati || '',
+      address: formValue.villagename || '',
+      description: `Study: ${formValue.study || ''}; Group: ${formValue.passexam || ''}; Marks: ${formValue.tmarks || ''}/${formValue.mmarks || ''}; Pastor: ${formValue.pastornum || ''}; Parent: ${formValue.parentnum || ''}; Denomination: ${formValue.denomination_id || ''}`
+    };
   }
   
   // poststudentsignup() {

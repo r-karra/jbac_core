@@ -474,10 +474,19 @@
                                     </div>
                                     <div class="col-md-2 mb-4 pb-2">
                                     </div>
-                                    <div class="col-md-2 mb-4 pb-2">
+                                    <div class="col-md-8 mb-4 pb-2" *ngIf="!paymentCompleted">
+                                        <button type="button" class="default-btn user-all-btn"
+                                            (click)="openMeetingPayment()" [disabled]="paymentInProgress">
+                                            {{ paymentInProgress ? 'Opening Razorpay...' : ('Pay ₹' + meetingPaymentAmount + ' to enable submit') }}
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2 mb-4 pb-2" *ngIf="paymentCompleted">
                                         <button type="submit" class="default-btn  user-all-btn"
                                             (click)="postmeetings()">Submit
                                         </button>
+                                        <div class="mt-2" style="font-size: 12px; color: green;">
+                                            Payment ID: {{ paymentId }}
+                                        </div>
                                     </div>
                                 </div>
                             </div>

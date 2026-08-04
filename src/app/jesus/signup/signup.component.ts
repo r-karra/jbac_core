@@ -734,28 +734,53 @@ export class SignupComponent {
   poststudentsignup() {
     this.showSpinner = true;
     this.submitted = true;
+
     if (this.studentform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
-    } else if (this.studentform.value.password != this.studentform.value.retypepassword) {
-      Swal.fire("Passwords are Unmatched")
-    } else {
-      this.service.poststudentsignup(this.studentform.value).subscribe((res: any) => {
+      this.showSpinner = false;
+      return;
+    }
+
+    const formValue = this.studentform.getRawValue();
+    const pwd = (formValue.password || '').trim();
+    const repwd = (formValue.retypepassword || '').trim();
+
+    // Detailed debug logging to help diagnose unmatched passwords
+    console.log('=== SIGNUP PASSWORD DEBUG ===');
+    console.log('Password length:', pwd.length, 'value:', pwd);
+    console.log('Retype-Password length:', repwd.length, 'value:', repwd);
+    console.log('Are they equal?', pwd === repwd);
+    console.log('Password bytes:', pwd.split('').map((c: string) => c.charCodeAt(0)));
+    console.log('Retype bytes:', repwd.split('').map((c: string) => c.charCodeAt(0)));
+    console.log('=============================');
+
+    if (pwd !== repwd) {
+      this.showSpinner = false;
+      Swal.fire('Passwords are Unmatched');
+      return;
+    }
+
+    // send trimmed passwords in form to backend
+    const payload = { ...formValue, password: pwd, retypepassword: repwd };
+
+    this.service.poststudentsignup(payload).subscribe(
+      (res: any) => {
+        this.showSpinner = false;
         if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
+          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
-          this.showSpinner = false;
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు')
+          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
           this.studentform.reset();
           this.submitted = false;
-          this.showSpinner = false;
         } else {
-          alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి')
+          alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి');
         }
       },
-        error => {
-        })
-    }
-    this.showSpinner = false;
+      (error) => {
+        this.showSpinner = false;
+        console.error('Signup error:', error);
+      }
+    );
   }
   church: any;
   pastor: any;
