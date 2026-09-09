@@ -3,11 +3,12 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "dev": "ng serve --host 0.0.0.0 --port 3000 --disable-host-check --live-reload=false",
+    "start": "ng serve --host 0.0.0.0 --port 3000 --disable-host-check --live-reload=false",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "post-build": "node./build/post-build.js"
+    "post-build": "node ./build/post-build.js"
   },
   "private": true,
   "dependencies": {

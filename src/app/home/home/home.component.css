@@ -1,298 +1,465 @@
-.loginbt2 {
-    box-sizing: border-box;
-    -webkit-appearance: none;
-    appearance: none;
-    background-color: green;
-    border: 2px solid green;
-    border-radius: 0.6em;
-    color: #f8f9fa;
-    cursor: pointer;
-    display: flex;
-    align-self: center;
-    font-weight: 400;
-    line-height: 1;
-    text-decoration: none;
-    text-align: center;
-    text-transform: uppercase;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700;
-    padding: 14px;
+/* ==========================================================================
+   JBAC DESIGN THEME PALETTE
+   Primary Navy: #0E1B2E (Deep Midnight Slate)
+   Secondary Slate: #1A2B45
+   Burnished Gold: #C5A059 / #D4AF37 (Elegance, Faith, Warmth)
+   Soft Ivory: #FBF9F5 (Warm Parchment Canvas)
+   ========================================================================== */
+
+:host {
+  display: block;
+  background-color: #fbf9f5;
+  color: #2c3e50;
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
-.fth {
-    padding: 12px 27px;
-    color: var(--whiteColor);
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    text-transform: capitalize;
-    color: white;
-    background-color: #909a9c;
-    border: none;
-    outline: none;
+/* --------------------------------------------------------------------------
+   Typography Mixins & Styling
+   -------------------------------------------------------------------------- */
+.font-ramabhadra {
+  font-family: 'Ramabhadra', sans-serif;
 }
 
-
-/* Extra small devices (phones, 600px and down) */
-@media only screen and (max-width: 600px) {
-    .myside {
-        height: 140px !important;
-        width: 363px !important;
-
-    }
+.display-quote {
+  font-family: 'Caveat', cursive;
+  letter-spacing: 0.02em;
 }
 
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media only screen and (min-width: 600px) {
-    .myside {
-        height: 244px !important;
-        width: 607px !important;
-    }
+.sub-label-accent {
+  font-family: 'Raleway', sans-serif;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.12em;
 }
 
-/* Medium devices (landscape tablets, 768px and up) */
-@media only screen and (min-width: 768px) {
-    .myside {
-        height: 309px !important;
-        width: 763px !important;
-    }
+.section-title {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 700;
+  font-size: 2.1rem;
+  color: #0e1b2e;
 }
 
-/* Large devices (laptops/desktops, 992px and up) */
-@media only screen and (min-width: 992px) {
-    .myside {
-        height: 400px !important;
-        width: 850px !important;
-    }
+.text-navy {
+  color: #0e1b2e !important;
 }
 
-/* Extra large devices (large laptops and desktops, 1200px and up) */
-@media only screen and (min-width: 1200px) {
-    .myside {
-        height: 100% !important;
-        width: 100% !important;
-    }
+.bg-navy {
+  background-color: #0e1b2e !important;
 }
 
-.slideshow {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    /* height: 300px; */
+.bg-navy-light {
+  background-color: #152238 !important;
 }
 
+.text-gold {
+  color: #c5a059 !important;
+}
 
+.text-gold-dark {
+  color: #8c6d2d !important;
+}
+
+.bg-gold-subtle {
+  background-color: rgba(197, 160, 89, 0.15) !important;
+}
+
+.bg-navy-subtle {
+  background-color: rgba(14, 27, 46, 0.08) !important;
+}
+
+.bg-light-ivory {
+  background-color: #f7f4ee !important;
+}
+
+.border-gold-subtle {
+  border-color: rgba(197, 160, 89, 0.3) !important;
+}
+
+.gold-divider {
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #c5a059, #e0c888);
+  border-radius: 2px;
+}
+
+.max-w-700 {
+  max-width: 700px;
+}
+
+/* --------------------------------------------------------------------------
+   Buttons & Micro-interactions
+   -------------------------------------------------------------------------- */
+.btn-gold {
+  background-color: #c5a059;
+  border: 1px solid #c5a059;
+  color: #0e1b2e;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn-gold:hover {
+  background-color: #b38e45;
+  border-color: #b38e45;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(197, 160, 89, 0.35);
+}
+
+.btn-outline-navy {
+  border: 2px solid #0e1b2e;
+  color: #0e1b2e;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.btn-outline-navy:hover {
+  background-color: #0e1b2e;
+  color: #ffffff;
+}
+
+/* --------------------------------------------------------------------------
+   Hero Carousel Section
+   -------------------------------------------------------------------------- */
+.hero-carousel-section {
+  position: relative;
+  background-color: #080f1a;
+}
+
+.slideshow-container {
+  min-height: 480px;
+  position: relative;
+}
+
+.mySlides {
+  display: none;
+  position: relative;
+}
+
+.mySlides.active {
+  display: block;
+}
+
+.fade-slide {
+  animation: fadeInEffect 0.8s ease-in-out forwards;
+}
+
+@keyframes fadeInEffect {
+  from {
+    opacity: 0.4;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.hero-image-wrapper {
+  position: relative;
+  width: 100%;
+  height: 520px;
+  overflow: hidden;
+}
+
+.hero-banner-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: brightness(0.85);
+}
+
+.hero-gradient-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(14, 27, 46, 0.94) 0%,
+    rgba(14, 27, 46, 0.72) 50%,
+    rgba(14, 27, 46, 0.25) 100%
+  );
+}
+
+.hero-caption {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  z-index: 5;
+}
+
+.scripture-badge {
+  background: rgba(197, 160, 89, 0.25);
+  border: 1px solid #c5a059;
+  color: #e5c583;
+  font-size: 0.82rem;
+  padding: 6px 14px;
+  border-radius: 50px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.hero-title {
+  font-family: 'Raleway', sans-serif;
+  font-weight: 800;
+  font-size: 2.75rem;
+  line-height: 1.15;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.hero-subtitle {
+  font-size: 1.15rem;
+  line-height: 1.6;
+  margin-top: 14px;
+}
+
+.carousel-control-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: white;
+  border: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 10;
+  transition: all 0.2s ease;
+}
+
+.carousel-control-btn:hover {
+  background: #c5a059;
+  color: #0e1b2e;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.carousel-control-btn.prev-btn {
+  left: 24px;
+}
+
+.carousel-control-btn.next-btn {
+  right: 24px;
+}
+
+.carousel-indicators-wrapper {
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
 
 .dot {
-    height: 25px;
-    width: 25px;
-    background-color: #bbb;
-    border-radius: 50%;
-    display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  background-color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+  font-size: 0;
+  color: transparent;
+  line-height: 0;
+  margin: 0 4px;
+  display: inline-block;
 }
 
-
-
-/* ////////////////////////////////////////////////////////////////////////////////// */
-* {
-    box-sizing: border-box
-  }
-  body {
-    font-family: Verdana, sans-serif;
-    margin: 0
-  }
-  .mySlides {
-    display: none
-  }
-  img {
-    vertical-align: middle;
-  }
-  .slideshow-container {
-    /* max-width: 1000px; */
-    position: relative;
-    margin: auto;
-  }
-  /* Next & previous buttons */
-  .prev,
-  .next {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    width: auto;
-    padding: 16px;
-    margin-top: -22px;
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    transition: 0.6s ease;
-    border-radius: 0 3px 3px 0;
-    user-select: none;
-  }
-  /* Position the "next button" to the right */
-  .next {
-    right: 0;
-    border-radius: 3px 0 0 3px;
-  }
-  /* On hover, add a black background color with a little bit see-through */
-  .prev:hover,
-  .next:hover {
-    background-color: rgba(0, 0, 0, 0.8);
-  }
-  /* Caption text */
-  .text {
-    color: #ffffff;
-    font-size: 15px;
-    padding: 8px 12px;
-    position: absolute;
-    bottom: 8px;
-    width: 100%;
-    text-align: center;
-  }
-  /* Number text (1/3 etc) */
-  .numbertext {
-    color: #ffffff;
-    font-size: 12px;
-    padding: 8px 12px;
-    position: absolute;
-    top: 0;
-  }
-  /* The dots/bullets/indicators */
-  .dot {
-    cursor: pointer;
-    height: 20px;
-    width: 20px;
-    margin: 0 2px;
-    color:white;
-    background-color: #999999;
-    border-radius: 50%;
-    display: inline-block;
-    transition: background-color 0.6s ease;
-  }
-
-  .active,.dot:hover {
-    background-color: #111111;
-  }
-  
-  /* Fading animation */
-  .fade {
-    -webkit-animation-name: fade;
-    -webkit-animation-duration: 0.5s;
-    animation-name: fade;
-    animation-duration: 0.5s;
-  }
-  
-  @-webkit-keyframes fade {
-    from {
-      opacity: .8
-    }
-    to {
-      opacity: 1
-    }
-  }
-
-  @keyframes fade {
-    from {
-      opacity: .8
-    }
-    to {
-      opacity: 1
-    }
-  }
-  /* On smaller screens, decrease text size */
-  @media only screen and (max-width: 300px) {
-    .prev,
-    .next,
-    .text {
-      font-size: 11px
-    }
-  }
-
-/* ///////////////////////////////////////////////////////////////////////////////// */
-
-
-/* For Desktop View */
-@media screen and (min-width: 1024px) {
-	.big {
-		display: block
-	}
-
-	.small {
-		display: none
-	}
+.dot.active {
+  background-color: #c5a059;
+  border-color: #c5a059;
+  transform: scale(1.25);
 }
 
-/* For Tablet View */
-@media screen and (min-device-width: 768px) and (max-device-width: 1024px) {
-	.big {
-		display: block
-	}
-
-	.small {
-		display: none
-	}
+/* --------------------------------------------------------------------------
+   Materialized Cards & Foundation Blocks
+   -------------------------------------------------------------------------- */
+.jbac-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
-/* For Mobile Portrait View */
-@media screen and (max-device-width: 480px) and (orientation: portrait) {
-	.big {
-		display: none
-	}
-
-	.small {
-		display: block
-	}
+.jbac-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(14, 27, 46, 0.08) !important;
 }
 
-/* For Mobile Landscape View */
-@media screen and (max-device-width: 640px) and (orientation: landscape) {
-	.big {
-		display: none
-	}
-
-	.small {
-		display: block
-	}
+.card-accent-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
-/* For Mobile Phones Portrait or Landscape View */
-@media screen and (max-device-width: 640px) {
-
-	.big {
-		display: none
-	}
-	.small {
-		display: block
-	}
+.card-accent-bar.gold-bg {
+  background: linear-gradient(90deg, #c5a059, #e0c888);
 }
 
-/* For iPhone 4 Portrait or Landscape View */
-@media screen and (min-device-width: 320px) and (-webkit-min-device-pixel-ratio: 2) {
-	.big {
-		display: none
-	}
-	.small {
-		display: block
-	}
+.card-accent-bar.navy-bg {
+  background: #0e1b2e;
 }
 
-/* For iPhone 5 Portrait or Landscape View */
-@media (device-height: 568px) and (device-width: 320px) and (-webkit-min-device-pixel-ratio: 2) {
-	.big {
-		display: none
-	}
-	.small {
-		display: block
-	}
+.icon-avatar-box {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* For iPhone 6 and 6 plus Portrait or Landscape View */
-@media (min-device-height: 667px) and (min-device-width: 375px) and (-webkit-min-device-pixel-ratio: 3) {
-	.big {
-		display: none
-	}
-	.small {
-		display: block
-	}
+.icon-avatar-box.gold-tint {
+  background: rgba(197, 160, 89, 0.15);
+}
+
+.icon-avatar-box.navy-tint {
+  background: rgba(14, 27, 46, 0.08);
+}
+
+.lead-quote {
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.6;
+  border-left: 3px solid #c5a059;
+  padding-left: 14px;
+}
+
+/* --------------------------------------------------------------------------
+   Service Action Cards
+   -------------------------------------------------------------------------- */
+.service-pill-card {
+  transition: all 0.25s ease;
+  border: 1px solid rgba(14, 27, 46, 0.06);
+}
+
+.service-pill-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.06) !important;
+  border-color: #c5a059;
+}
+
+.pill-icon {
+  width: 60px;
+  height: 60px;
+  background: #fbf9f5;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.link-gold {
+  color: #8c6d2d;
+}
+
+.link-gold:hover {
+  color: #0e1b2e;
+}
+
+/* --------------------------------------------------------------------------
+   Event Showcase Cards
+   -------------------------------------------------------------------------- */
+.event-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.event-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 32px rgba(14, 27, 46, 0.1) !important;
+}
+
+.event-thumb-wrap {
+  height: 190px;
+  overflow: hidden;
+  position: relative;
+}
+
+.event-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.event-card:hover .event-img {
+  transform: scale(1.04);
+}
+
+.event-date-badge {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: #0e1b2e;
+  color: white;
+  border: 2px solid #c5a059;
+  border-radius: 10px;
+  padding: 4px 10px;
+  text-align: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+}
+
+.event-date-badge .month {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #c5a059;
+  letter-spacing: 0.05em;
+}
+
+.event-date-badge .day {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.btn-gold-subtle {
+  background-color: rgba(197, 160, 89, 0.18);
+  color: #8c6d2d;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 14px;
+  transition: all 0.2s ease;
+}
+
+.btn-gold-subtle:hover {
+  background-color: #c5a059;
+  color: #0e1b2e;
+}
+
+/* --------------------------------------------------------------------------
+   CTA Section Ambient Glow
+   -------------------------------------------------------------------------- */
+.ambient-glow {
+  position: absolute;
+  top: -50%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(197, 160, 89, 0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Responsive Adjustments
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  .hero-caption .hero-title {
+    font-size: 1.85rem;
+  }
+  .hero-image-wrapper {
+    height: 420px;
+  }
+  .carousel-control-btn {
+    display: none;
+  }
 }

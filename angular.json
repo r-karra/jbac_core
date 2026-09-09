@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/churchwebsite",
+            "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -60,12 +60,22 @@
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "port": 3000,
+            "host": "0.0.0.0",
+            "disableHostCheck": true,
+            "allowedHosts": ["all"],
+            "liveReload": false
+          },
           "configurations": {
             "production": {
               "browserTarget": "churchwebsite:build:production"
             },
             "development": {
-              "browserTarget": "churchwebsite:build:development"
+              "browserTarget": "churchwebsite:build:development",
+              "disableHostCheck": true,
+              "allowedHosts": ["all"],
+              "liveReload": false
             }
           },
           "defaultConfiguration": "development"

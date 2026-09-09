@@ -1,0 +1,8 @@
+{
+  "name": "Jesus Believers Association Council",
+  "description": "Jesus Believers Association Council (JBAC) community portal and directory.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

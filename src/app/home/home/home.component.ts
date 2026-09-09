@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ServiceService } from 'src/app/jesus/service.service';
 import Swal from 'sweetalert2';
 
@@ -9,7 +9,7 @@ import Swal from 'sweetalert2';
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.css'],
   standalone: true,
-  imports: [CommonModule]
+  imports: [CommonModule, RouterModule]
 })
 export class HomeComponent {
   name: any;
@@ -35,6 +35,7 @@ export class HomeComponent {
     } else {
       this.logincon = false;
     }
+    this.getmusical();
   }
 
   ngAfterViewInit() {
@@ -57,26 +58,33 @@ export class HomeComponent {
         this.slideIndex = this.slides.length - 1;
       }
     }
+    this.showSlides();
   }
 
   showSlides() {
- 
+    if (!this.slides || this.slides.length === 0) return;
     for (let i = 0; i < this.slides.length; i++) {
       this.slides[i].style.display = "none";
-      this.dots[i].classList.remove('active');
+      if (this.dots && this.dots[i]) {
+        this.dots[i].classList.remove('active');
+      }
     }
     this.slideIndex++;
     if (this.slideIndex > this.slides.length) {
-      this.slideIndex = 1
+      this.slideIndex = 1;
     }
-    this.slides[this.slideIndex - 1].style.display = "block";
-    this.dots[this.slideIndex - 1].classList.add('active');
+    if (this.slides[this.slideIndex - 1]) {
+      this.slides[this.slideIndex - 1].style.display = "block";
+    }
+    if (this.dots && this.dots[this.slideIndex - 1]) {
+      this.dots[this.slideIndex - 1].classList.add('active');
+    }
     if (this.timeoutId) {
       clearTimeout(this.timeoutId);
     }
     this.timeoutId = setTimeout(() => {
       this.showSlides();
-    }, 15000); // Change image every 5 seconds
+    }, 6000);
   }
 
 

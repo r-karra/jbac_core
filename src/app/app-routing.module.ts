@@ -122,7 +122,12 @@ const routes: Routes = [
   { path: 'entry', component: EntryComponent },
  { path: 'namodu', component: NamoduComponent  },
  { path: 'wish', component:WishComponent  },
-  
+  { path: 'members', component: ChurchPastorSearchComponent },
+  { path: 'education', component: CollegesComponent },
+  { path: 'council', component: LeadersComponent },
+  { path: 'register', component: NamoduComponent },
+  { path: 'contact', component: ContactusComponent },
+  { path: '**', redirectTo: '' }
 ];
 
 @NgModule({
