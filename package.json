@@ -27,6 +27,7 @@
     "@popperjs/core": "^2.11.7",
     "angular-responsive-carousel": "^2.1.2",
     "carousel": "0.0.3",
+    "mysql2": "^3.24.4",
     "ng-image-slider": "^7.0.0",
     "ng-modules": "^3.0.11",
     "ng2-search-filter": "^0.5.1",
