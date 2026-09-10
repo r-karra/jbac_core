@@ -76,7 +76,7 @@ export class BelieverregisterComponent {
       god: [''],
       // // term: ['', [Validators.required]],
       password: ['', [Validators.required, Validators.minLength(6)]],
-     // retypepassword: ['', [Validators.required, Validators.minLength(6)]],
+      retypepassword: ['', [Validators.required, Validators.minLength(6)]],
     })
   }
   get h() { return this.beliverform.controls; }
@@ -182,12 +182,15 @@ export class BelieverregisterComponent {
   }
   postbeliversignup() {
     this.submitted = true;
+    const formValue = this.beliverform.value;
+    const pwd = (formValue.password || '').trim();
+    const repwd = (formValue.retypepassword || '').trim();
     if (this.beliverform.invalid) {
       Swal.fire('please fill the details');
-    } else if (this.beliverform.value.password != this.beliverform.value.retypepassword) {
-      Swal.fire("Passwords are Unmatched")
+    } else if (pwd !== repwd) {
+      Swal.fire("Passwords are Unmatched");
     } else {
-      this.service.postbeliver(this.beliverform.value).subscribe((res: any) => {
+      this.service.postbeliver({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {

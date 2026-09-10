@@ -100,8 +100,8 @@ export class StudentregisterComponent {
 
   // Check if passwords match in real-time
   get passwordsMatch(): boolean {
-    const pwd = this.studentform.get('password')?.value || '';
-    const repwd = this.studentform.get('retypepassword')?.value || '';
+    const pwd = (this.studentform.get('password')?.value || '').trim();
+    const repwd = (this.studentform.get('retypepassword')?.value || '').trim();
     return pwd === repwd && pwd.length >= 6;
   }
 
@@ -606,22 +606,15 @@ export class StudentregisterComponent {
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
     
-    console.log('=== PASSWORD DEBUG ===');
-    console.log('Password length:', pwd.length, 'value:', pwd);
-    console.log('Retype-Password length:', repwd.length, 'value:', repwd);
-    console.log('Are they equal?', pwd === repwd);
-    console.log('Password bytes:', pwd.split('').map((c: string) => c.charCodeAt(0)));
-    console.log('Retype bytes:', repwd.split('').map((c: string) => c.charCodeAt(0)));
-    console.log('======================');
-    
     if (pwd !== repwd) {
       this.showSpinner = false;
-      this.showAlert('warning', 'గమనిక!', `Passwords do not match!\n\nPassword: ${pwd}\nRetype: ${repwd}`);
+      this.showAlert('warning', 'గమనిక!', 'Passwords are Unmatched');
       return;
     }
     
     // Send the entire form value like other registration forms do
-    this.service.poststudentsignup(formValue)
+    const payload = { ...formValue, password: pwd, retypepassword: repwd };
+    this.service.poststudentsignup(payload)
       .pipe(finalize(() => this.showSpinner = false)) // Ensures spinner is hidden no matter what
       .subscribe(
         (res: any) => {
