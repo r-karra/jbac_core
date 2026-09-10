@@ -5,7 +5,7 @@
     "ng": "ng",
     "dev": "ng serve --host 0.0.0.0 --port 3000 --disable-host-check --live-reload=false",
     "start": "ng serve --host 0.0.0.0 --port 3000 --disable-host-check --live-reload=false",
-    "build": "ng build",
+    "build": "node init-db.js && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "post-build": "node ./build/post-build.js"
