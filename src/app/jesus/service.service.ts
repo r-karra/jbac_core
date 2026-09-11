@@ -3,15 +3,17 @@ import { HttpClient } from '@angular/common/http';
 import { map } from 'rxjs/operators'
 import { BehaviorSubject } from 'rxjs';
 import Swal from 'sweetalert2';
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class ServiceService {
 
-
-  // testApi = 'http://localhost:1430/dashboardapi/'
-
-  testApi = 'https://jbac.in:9762/dashboardapi/'
+  // Routes to AWS Cloud Backend Gateway
+  testApi = (environment && environment.apiUrl)
+    ? `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`
+    : 'https://jbac.in:9762/dashboardapi/';
 
 
   public loingstatus = new BehaviorSubject(0);
