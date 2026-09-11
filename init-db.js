@@ -3,11 +3,11 @@ import mysql from 'mysql2/promise';
 async function setupDatabase() {
   try {
     const connection = await mysql.createConnection({
-      host: '://amazonaws.com',
+      host: process.env.DB_HOST || 'jbac-db-cluster.cluster-cdeeuw0s2trf.ap-southeast-2.rds.amazonaws.com',
       port: 3306,
       user: 'admin',
       password: 'biUt2TrZ9EZAqn6GXhiA',
-      database: 'sys'
+      database: 'jbac_db'
     });
 
     console.log("🚀 Connected to AWS Aurora Serverless v2 inside the network!");
@@ -23,12 +23,15 @@ async function setupDatabase() {
     `);
     console.log("✔ Created 'announcements' table framework layout.");
 
-    // 2. Insert a beautiful welcome announcement entry so your home component isn't empty
-    await connection.query(`
-      INSERT INTO announcements (title, content)
-      VALUES ('Welcome to JBAC Portal!', 'Greetings in the name of our Lord. Our serverless database cluster is now fully active, secure, and operational on AWS!')
-    `);
-    console.log("✔ Inserted welcome announcement entry record successfully.");
+    // 2. Insert welcome announcement entry if empty
+    const [existing] = await connection.query('SELECT COUNT(*) as count FROM announcements');
+    if (existing[0].count === 0) {
+      await connection.query(`
+        INSERT INTO announcements (title, content)
+        VALUES ('Welcome to JBAC Portal!', 'Greetings in the name of our Lord. Our serverless database cluster is now fully active, secure, and operational on AWS!')
+      `);
+      console.log("✔ Inserted welcome announcement entry record successfully.");
+    }
 
     await connection.end();
     console.log("🎉 All database migrations finished cleanly!");
