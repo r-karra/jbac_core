@@ -378,9 +378,16 @@ export class PastorassociationregisterComponent {
   }
 
   getdistric() {
-    this.service.getdistrict().subscribe(res => {
-      this.districts = res.data;
-    })
+    this.service.getdistrict().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.districts = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load districts:', err);
+        this.districts = [];
+      }
+    });
   }
 
   // getmandals(event: any) {

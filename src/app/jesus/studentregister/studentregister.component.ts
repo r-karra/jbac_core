@@ -148,21 +148,42 @@ export class StudentregisterComponent {
 
 
   getbelivers() {
-    this.service.getbelivers().subscribe((res: any) => {
-      this.bliversdata = res.data;
-    })
+    this.service.getbelivers().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.bliversdata = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load believers:', err);
+        this.bliversdata = [];
+      }
+    });
   }
 
   getdenomations() {
-    this.service.getdenomation().subscribe(res => {
-      this.denomation = res.data;
-    })
+    this.service.getdenomation().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.denomation = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load denominations:', err);
+        this.denomation = [];
+      }
+    });
   }
 
   getpatterns() {
-    this.service.getpattern().subscribe(res => {
-      this.pattern = res.data;
-    })
+    this.service.getpattern().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.pattern = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load patterns:', err);
+        this.pattern = [];
+      }
+    });
   }
 
   // getdistric() {
@@ -174,31 +195,18 @@ export class StudentregisterComponent {
   // }
   getdistric() {
     this.showSpinner = true;
-
-    this.service.getdistrict().subscribe(
-      (res: any) => {
-        if (res && res.data) {
-          this.districts = res.data;
-        }
-        else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'గమనిక!',
-            text: 'జిల్లాల సమాచారము అందుబాటులో లేదు.',
-          });
-        }
+    this.service.getdistrict().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.districts = Array.isArray(list) ? list : [];
         this.showSpinner = false;
       },
-      (error) => {
-        console.error('జిల్లా పొందడంలో సమస్య వుంది', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'లోపం!',
-          text: 'జిల్లా పొందడంలో సమస్య వుంది, దయచేసి మరల ప్రయత్నించండి.',
-        });
+      error: (error) => {
+        console.error('Failed to load districts:', error);
+        this.districts = [];
         this.showSpinner = false;
       }
-    );
+    });
   }
 
   // getconstency(event: any) {

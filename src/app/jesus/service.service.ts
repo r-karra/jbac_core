@@ -1,20 +1,97 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map } from 'rxjs/operators'
-import { BehaviorSubject } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
+import { BehaviorSubject, Observable, of, throwError } from 'rxjs';
 import Swal from 'sweetalert2';
 import { environment } from '../../environments/environment';
+import {
+  FALLBACK_DISTRICTS,
+  FALLBACK_DENOMINATIONS,
+  FALLBACK_SERVICES,
+  FALLBACK_LEADER_LEVELS,
+  FALLBACK_PATTERNS
+} from './fallback-data';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ServiceService {
 
-  // Routes to AWS Cloud Backend Gateway
-  testApi = (environment && environment.apiUrl)
-    ? `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`
-    : 'https://jbac.in:9762/dashboardapi/';
+  // Dynamically determines the appropriate API URL base
+  get testApi(): string {
+    return this.getBaseApiUrl();
+  }
 
+  getBaseApiUrl(): string {
+    if (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') {
+      // Running on HTTPS (e.g. AWS Amplify)
+      // Browsers block direct http:// calls as Mixed Content.
+      // Route via relative /dashboardapi/ so AWS Amplify's Reverse Proxy can forward to Elastic Beanstalk
+      if (environment && environment.apiUrl && environment.apiUrl.startsWith('https:')) {
+        return `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`;
+      }
+      return '/dashboardapi/';
+    }
+    // Running on HTTP (e.g. localhost dev)
+    if (environment && environment.apiUrl) {
+      return `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`;
+    }
+    return 'http://jbac-backend-env.eba-rdpqwigp.ap-southeast-2.elasticbeanstalk.com/dashboardapi/';
+  }
+
+  /**
+   * Multi-tiered resilient API caller:
+   * 1. Primary API: Amplify Reverse Proxy (/dashboardapi/) or Elastic Beanstalk
+   * 2. Automatic Fallback: Live HTTPS endpoint (https://jbac.in:9762/dashboardapi/)
+   * 3. Static Fallback: Pre-bundled datasets so dropdowns never fail or stay empty
+   */
+  executePost<T = any>(endpoint: string, body: any = {}, fallbackData?: any): Observable<T> {
+    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const primaryUrl = `${this.getBaseApiUrl()}${cleanEndpoint}`;
+    const fallbackBase = (environment && (environment as any).fallbackApiUrl)
+      ? (environment as any).fallbackApiUrl.replace(/\/+$/, '')
+      : 'https://jbac.in:9762/dashboardapi';
+    const fallbackUrl = `${fallbackBase}/${cleanEndpoint}`;
+
+    return this.http.post<T>(primaryUrl, body).pipe(
+      catchError((primaryErr) => {
+        console.warn(`[ServiceService] Primary call to ${primaryUrl} failed. Retrying fallback ${fallbackUrl}:`, primaryErr);
+        return this.http.post<T>(fallbackUrl, body).pipe(
+          catchError((fallbackErr) => {
+            console.error(`[ServiceService] Fallback call to ${fallbackUrl} failed:`, fallbackErr);
+            if (fallbackData !== undefined) {
+              return of({ status: 200, data: fallbackData } as any);
+            }
+            return throwError(() => fallbackErr);
+          })
+        );
+      })
+    );
+  }
+
+  executeGet<T = any>(endpoint: string, fallbackData?: any): Observable<T> {
+    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const primaryUrl = `${this.getBaseApiUrl()}${cleanEndpoint}`;
+    const fallbackBase = (environment && (environment as any).fallbackApiUrl)
+      ? (environment as any).fallbackApiUrl.replace(/\/+$/, '')
+      : 'https://jbac.in:9762/dashboardapi';
+    const fallbackUrl = `${fallbackBase}/${cleanEndpoint}`;
+
+    return this.http.get<T>(primaryUrl).pipe(
+      catchError((primaryErr) => {
+        console.warn(`[ServiceService] Primary GET to ${primaryUrl} failed. Retrying fallback ${fallbackUrl}:`, primaryErr);
+        return this.http.get<T>(fallbackUrl).pipe(
+          catchError((fallbackErr) => {
+            console.error(`[ServiceService] Fallback GET to ${fallbackUrl} failed:`, fallbackErr);
+            if (fallbackData !== undefined) {
+              return of({ status: 200, data: fallbackData } as any);
+            }
+            return throwError(() => fallbackErr);
+          })
+        );
+      })
+    );
+  }
 
   public loingstatus = new BehaviorSubject(0);
   getloginstatus = this.loingstatus.asObservable();
@@ -63,138 +140,80 @@ export class ServiceService {
 
   getaboutcall() {
     var data = {}
-    return this.http.post<any>(this.testApi + `getaboutwebsite`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getaboutwebsite', data);
   }
 
   postsignup(data: any) {
-    return this.http.post(this.testApi + 'postwebsitesignup', data)
+    return this.executePost('postwebsitesignup', data);
   }
 
-
   passwordlogin(data: any) {
-    return this.http.post(this.testApi + 'passwordwebsitelogin', data)
+    return this.executePost('passwordwebsitelogin', data);
   }
 
   getevents() {
     var data = {}
-    return this.http.post<any>(this.testApi + `getupdateevents`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getupdateevents', data);
   }
 
   postbeliver(data: any) {
-    return this.http.post(this.testApi + 'postbeliversignup', data)
+    return this.executePost('postbeliversignup', data);
   }
 
   getdenomation() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `denomations`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('denomations', {}, FALLBACK_DENOMINATIONS);
   }
 
   getleaderlevel() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `leaderlevels`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('leaderlevels', {}, FALLBACK_LEADER_LEVELS);
   }
-    geteducational() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `educationalq`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+
+  geteducational() {
+    return this.executePost('educationalq', {});
   }
+
   institutes() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getinstitutes`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getinstitutes', {});
   }
 
   getpattern() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `pattern`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('pattern', {}, FALLBACK_PATTERNS);
   }
 
   postministrysignup(data: any) {
-    return this.http.post(this.testApi + 'postministrysignup', data)
+    return this.executePost('postministrysignup', data);
   }
+
   postregform(data: any) {
-    return this.http.post(this.testApi + 'postregform', data)
+    return this.executePost('postregform', data);
   }
 
-postwishform(data: any) {
-  console.log(data);
-    return this.http.post(this.testApi + 'postwishform', data)
+  postwishform(data: any) {
+    return this.executePost('postwishform', data);
   }
-
 
   getdistrict() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getdistricts`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getdistricts', {}, FALLBACK_DISTRICTS);
   }
+
   getmdistrict() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getmdistricts`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getmdistricts', {}, FALLBACK_DISTRICTS);
   }
+
   getmandals() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getmandals`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getmandals', {});
   }
+
   getmmandals() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getmmandals`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getmmandals', {});
   }
+
   gepanchayatis() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `gepanchayati`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('gepanchayati', {});
   }
+
   gempanchayatis() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `gepanchayati`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('gepanchayati', {});
   }
 
   getbelivers() {
@@ -222,16 +241,11 @@ postwishform(data: any) {
   }
 
   getservices() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getservices`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getservices', {}, FALLBACK_SERVICES);
   }
 
   addNew(proofdata: any) {
-    return this.http.post<any>(this.testApi + `addNew`, proofdata).pipe(map(res => {
+    return this.executePost('addNew', proofdata).pipe(map(res => {
       if (res.status == 300) {
         this.errorAlert2();
       }
@@ -244,49 +258,24 @@ postwishform(data: any) {
 
 
   getconsistencys() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getconsistencys`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getconsistencys', {});
   }
   getmconsistencys() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getmconsistencys`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getmconsistencys', {});
   }
   poststudentsignup(data: any) {
-    return this.http.post(this.testApi + 'studentsignup', data)
+    return this.executePost('studentsignup', data);
   }
 
   getchurch() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getchurch`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getchurch', {});
   }
   getbeliversdata() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getbeliversdata`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getbeliversdata', {});
   }
 
   getpastor() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getpastor`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getpastor', {});
   }
 
   postsmeetings(data: any) {
@@ -390,7 +379,7 @@ postwishform(data: any) {
   }
 
   getwing() {
-    return this.http.post(this.testApi + 'getwing', []);
+    return this.executePost('getwing', []);
   }
 
 
@@ -550,12 +539,7 @@ postwishform(data: any) {
 
 
   getpastorassci() {
-    var data = {}
-    return this.http.post<any>(this.testApi + `getpastorassociation`, data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getpastorassociation', {});
   }
 
   getvideourldatadetails() {
@@ -646,18 +630,10 @@ postwishform(data: any) {
   }
   /////////////////////////////////service page data////////////////////////////
   getpastorsfilters(data: any) {
-    return this.http.post<any>(this.testApi + 'getpastorsfilters', data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getpastorsfilters', data);
   }
   getchurchesdatafilters(data: any) {
-    return this.http.post<any>(this.testApi + 'getchurchesdatafilters', data).pipe(map(res => {
-      return res;
-    }, (error: any) => {
-      return error;
-    }));
+    return this.executePost('getchurchesdatafilters', data);
   }
 
   viewupdates(data: any) {

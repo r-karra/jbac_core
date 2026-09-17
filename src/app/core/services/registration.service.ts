@@ -16,8 +16,9 @@ export class RegistrationService {
    * @param formData The raw input data object from the user form layout
    */
   public submitRegistration(registrationType: string, formData: any): Observable<any> {
-    // Looks at your live AWS Elastic Beanstalk URL link automatically
-    const endpoint = `${environment.apiUrl}/register-member`;
+    const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+    const baseUrl = isHttps ? '' : (environment.apiUrl || '');
+    const endpoint = `${baseUrl}/api/register-member`;
 
     // We package the type along with the data so the backend can tell who is registering
     const payload = {

@@ -377,72 +377,97 @@ godOptions: string[] = [
   }
 
   getwing() {
-    this.service.getwing().subscribe((res: any) => {
-      this.wings = res.data;
-    })
+    this.service.getwing().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.wings = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load wings:', err);
+        this.wings = [];
+      }
+    });
   }
 
-
   getbelivers() {
-    this.service.getbelivers().subscribe((res: any) => {
-      this.bliversdata = res.data;
-    })
+    this.service.getbelivers().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.bliversdata = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load believers:', err);
+        this.bliversdata = [];
+      }
+    });
   }
 
   getdenomations() {
-    this.service.getdenomation().subscribe(res => {
-      this.denomation = res.data;
-    })
+    this.service.getdenomation().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.denomation = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load denominations:', err);
+        this.denomation = [];
+      }
+    });
   }
 
   getleaderlevels() {
-    this.service.getleaderlevel().subscribe(res => {
-      this.leaderlevel = res.data;
-    })
-  }
-geteducational() {
-    this.service.geteducational().subscribe(res => {
-      this.educationqly = res.data;
-    })
-  }
-  getpatterns() {
-    this.service.getpattern().subscribe(res => {
-      this.pattern = res.data;
-    })
+    this.service.getleaderlevel().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.leaderlevel = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load leader levels:', err);
+        this.leaderlevel = [];
+      }
+    });
   }
 
-  // getdistric() {
-  //   this.service.getdistrict().subscribe(res => {
-  //     this.districts = res.data;
-  //   })
-  // }
- getdistric() {
+  geteducational() {
+    this.service.geteducational().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.educationqly = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load educational qualifications:', err);
+        this.educationqly = [];
+      }
+    });
+  }
+
+  getpatterns() {
+    this.service.getpattern().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.pattern = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load patterns:', err);
+        this.pattern = [];
+      }
+    });
+  }
+
+  getdistric() {
     this.showSpinner = true;
-  
-    this.service.getdistrict().subscribe(
-      (res: any) => {
-        if (res && res.data) {
-          this.districts = res.data;
-        }
-         else {
-          Swal.fire({
-            icon: 'warning',
-            title: 'గమనిక!',
-            text: 'జిల్లాల సమాచారము అందుబాటులో లేదు.',
-          });
-        }
+    this.service.getdistrict().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.districts = Array.isArray(list) ? list : [];
         this.showSpinner = false;
       },
-      (error) => {
+      error: (error) => {
         console.error('జిల్లా పొందడంలో సమస్య వుంది', error);
-        Swal.fire({
-          icon: 'error',
-          title: 'లోపం!',
-          text: 'జిల్లా పొందడంలో సమస్య వుంది, దయచేసి మరల ప్రయత్నించండి.',
-        });
+        this.districts = [];
         this.showSpinner = false;
       }
-    );
+    });
   }
   
  getconstency(event: any) {

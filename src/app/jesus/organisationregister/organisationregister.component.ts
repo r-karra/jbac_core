@@ -348,57 +348,113 @@ export class OrganisationregisterComponent {
   }
 
   getwing() {
-    this.service.getwing().subscribe((res: any) => {
-      this.wings = res.data;
-    })
+    this.service.getwing().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.wings = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load wings:', err);
+        this.wings = [];
+      }
+    });
   }
 
-
   getbelivers() {
-    this.service.getbelivers().subscribe((res: any) => {
-      this.bliversdata = res.data;
-    })
+    this.service.getbelivers().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.bliversdata = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load believers:', err);
+        this.bliversdata = [];
+      }
+    });
   }
 
   getdenomations() {
-    this.service.getdenomation().subscribe(res => {
-      this.denomation = res.data;
-    })
+    this.service.getdenomation().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.denomation = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load denominations:', err);
+        this.denomation = [];
+      }
+    });
   }
 
   getpatterns() {
-    this.service.getpattern().subscribe(res => {
-      this.pattern = res.data;
-    })
+    this.service.getpattern().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.pattern = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load patterns:', err);
+        this.pattern = [];
+      }
+    });
   }
 
   getdistric() {
-    this.service.getdistrict().subscribe(res => {
-      this.districts = res.data;
-    })
+    this.service.getdistrict().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.districts = Array.isArray(list) ? list : [];
+      },
+      error: (err) => {
+        console.error('Failed to load districts:', err);
+        this.districts = [];
+      }
+    });
   }
 
   getmandals(event: any) {
-    var id = event.target.value;
-    this.service.getmandals().subscribe(res => {
-      this.mandals = res.data.filter((data: any) => data.const_id == id);
-    })
+    const id = event?.target?.value;
+    if (!id) return;
+    this.service.getmandals().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.mandals = Array.isArray(list) ? list.filter((data: any) => data.const_id == id) : [];
+      },
+      error: (err) => {
+        console.error('Failed to load mandals:', err);
+        this.mandals = [];
+      }
+    });
   }
 
   getconstency(event: any) {
-    var id = event.target.value;
-    this.service.getconsistencys().subscribe(res => {
-      this.constituency = res.data.filter((data: any) => data.dstrct_id == id);
-    })
+    const id = event?.target?.value;
+    if (!id) return;
+    this.service.getconsistencys().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.constituency = Array.isArray(list) ? list.filter((data: any) => data.dstrct_id == id) : [];
+      },
+      error: (err) => {
+        console.error('Failed to load constituencies:', err);
+        this.constituency = [];
+      }
+    });
   }
 
   gepanchayati(event: any) {
-    var id = event.target.value;
-    this.service.gepanchayatis().subscribe(res => {
-      this.panchayati = res.data.filter((data: any) => data.mndl_id == id);
-
-
-    })
+    const id = event?.target?.value;
+    if (!id) return;
+    this.service.gepanchayatis().subscribe({
+      next: (res: any) => {
+        const list = res?.data || res || [];
+        this.panchayati = Array.isArray(list) ? list.filter((data: any) => data.mndl_id == id) : [];
+      },
+      error: (err) => {
+        console.error('Failed to load panchayati:', err);
+        this.panchayati = [];
+      }
+    });
   }
   getpastorsdatas: any;
 
