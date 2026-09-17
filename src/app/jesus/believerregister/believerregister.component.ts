@@ -225,25 +225,42 @@ export class BelieverregisterComponent {
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
     if (this.beliverform.invalid) {
-      Swal.fire('please fill the details');
+      Swal.fire('దయచేసి అన్ని వివరాలు నమోదు చేయండి');
+      this.submitted = false;
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
+      this.submitted = false;
     } else {
-      this.service.postbeliver({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
-        } else if (res.status == 200) {
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
-          this.beliverform.reset();
-
+      this.service.postbeliver({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+        (res: any) => {
           this.submitted = false;
-        } else {
-          alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి');
-
-        }
-      },
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
+            this.beliverform.reset();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+            });
+          }
+        },
         error => {
-        })
+          this.submitted = false;
+          console.error('[BelieverRegister] Error:', error);
+          const isMixedContent = error?.status === 0;
+          const msg = isMixedContent
+            ? 'సర్వర్ కనెక్షన్ బ్లాక్ చేయబడింది (HTTPS/HTTP Mixed Content). దయచేసి బ్యాకెండ్‌ను క్లౌడ్‌ఫ్రంట్ (HTTPS) ద్వారా అనుసంధానించండి.'
+            : (error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి');
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: msg
+          });
+        }
+      );
     }
   }
   church: any;

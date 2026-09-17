@@ -657,25 +657,43 @@ export class OrganisationregisterComponent {
     const repwd = (formValue.retypepassword || '').trim();
 
     if (this.independentorgainsationform.invalid) {
-      Swal.fire('please fiil the details ');
+      Swal.fire('దయచేసి అన్ని వివరాలు నమోదు చేయండి');
+      this.submitted = false;
       return;
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
+      this.submitted = false;
     } else {
-      this.service.postindepedentorganisation({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
-        } else if (res.status == 200) {
-
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
-          this.independentorgainsationform.reset();
+      this.service.postindepedentorganisation({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+        (res: any) => {
           this.submitted = false;
-
-        } else {
-          alert('Error');
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
+            this.independentorgainsationform.reset();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'Error'
+            });
+          }
+        },
+        error => {
+          this.submitted = false;
+          console.error('[OrganisationRegister] Error:', error);
+          const isMixedContent = error?.status === 0;
+          const msg = isMixedContent
+            ? 'సర్వర్ కనెక్షన్ బ్లాక్ చేయబడింది (HTTPS/HTTP Mixed Content). దయచేసి బ్యాకెండ్‌ను క్లౌడ్‌ఫ్రంట్ (HTTPS) ద్వారా అనుసంధానించండి.'
+            : (error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి');
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: msg
+          });
         }
-
-      })
+      );
     }
   }
 

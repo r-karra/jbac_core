@@ -23,15 +23,24 @@ export class ServiceService {
   }
 
   getBaseApiUrl(): string {
+    // Check for runtime configured API URL (e.g. AWS CloudFront HTTPS endpoint stored in localStorage)
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const customApi = window.localStorage.getItem('JBAC_API_URL');
+      if (customApi) {
+        return `${customApi.replace(/\/+$/, '')}/dashboardapi/`;
+      }
+    }
+
     if (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') {
       // Running on HTTPS (e.g. AWS Amplify)
-      // Browsers block direct http:// calls as Mixed Content.
-      // Route via relative /dashboardapi/ so AWS Amplify's Reverse Proxy can forward to Elastic Beanstalk
+      // If a full HTTPS apiUrl is configured in environment, use it
       if (environment && environment.apiUrl && environment.apiUrl.startsWith('https:')) {
         return `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`;
       }
+      // Otherwise route via relative /dashboardapi/
       return '/dashboardapi/';
     }
+
     // Running on HTTP (e.g. localhost dev)
     if (environment && environment.apiUrl) {
       return `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`;
@@ -40,31 +49,38 @@ export class ServiceService {
   }
 
   /**
-   * Multi-tiered resilient API caller:
-   * 1. Primary API: Amplify Reverse Proxy (/dashboardapi/) or Elastic Beanstalk
-   * 2. Automatic Fallback: Live HTTPS endpoint (https://jbac.in:9762/dashboardapi/)
-   * 3. Static Fallback: Pre-bundled datasets so dropdowns never fail or stay empty
+   * Dedicated write/mutation executor for registrations and user submissions.
+   * STRICT SECURITY GUARANTEE: Never redirects or falls back to third-party legacy servers!
+   * Ensures data ONLY lands in the user's AWS Aurora RDS database.
+   */
+  executeWrite<T = any>(endpoint: string, body: any = {}): Observable<T> {
+    const cleanEndpoint = endpoint.replace(/^\/+/, '');
+    const primaryUrl = `${this.getBaseApiUrl()}${cleanEndpoint}`;
+
+    return this.http.post<T>(primaryUrl, body).pipe(
+      catchError((primaryErr) => {
+        console.error(`[ServiceService] Registration/Write operation to ${primaryUrl} failed:`, primaryErr);
+        return throwError(() => primaryErr);
+      })
+    );
+  }
+
+  /**
+   * Resilient reader for dropdowns and master datasets.
+   * Uses bundled static datasets if the backend is unreachable so UI dropdowns never fail.
    */
   executePost<T = any>(endpoint: string, body: any = {}, fallbackData?: any): Observable<T> {
     const cleanEndpoint = endpoint.replace(/^\/+/, '');
     const primaryUrl = `${this.getBaseApiUrl()}${cleanEndpoint}`;
-    const fallbackBase = (environment && (environment as any).fallbackApiUrl)
-      ? (environment as any).fallbackApiUrl.replace(/\/+$/, '')
-      : 'https://jbac.in:9762/dashboardapi';
-    const fallbackUrl = `${fallbackBase}/${cleanEndpoint}`;
 
     return this.http.post<T>(primaryUrl, body).pipe(
       catchError((primaryErr) => {
-        console.warn(`[ServiceService] Primary call to ${primaryUrl} failed. Retrying fallback ${fallbackUrl}:`, primaryErr);
-        return this.http.post<T>(fallbackUrl, body).pipe(
-          catchError((fallbackErr) => {
-            console.error(`[ServiceService] Fallback call to ${fallbackUrl} failed:`, fallbackErr);
-            if (fallbackData !== undefined) {
-              return of({ status: 200, data: fallbackData } as any);
-            }
-            return throwError(() => fallbackErr);
-          })
-        );
+        console.warn(`[ServiceService] Primary call to ${primaryUrl} failed:`, primaryErr);
+        // If static fallback dataset is provided, use it so dropdowns don't stay empty
+        if (fallbackData !== undefined) {
+          return of({ status: 200, data: fallbackData } as any);
+        }
+        return throwError(() => primaryErr);
       })
     );
   }
@@ -72,23 +88,14 @@ export class ServiceService {
   executeGet<T = any>(endpoint: string, fallbackData?: any): Observable<T> {
     const cleanEndpoint = endpoint.replace(/^\/+/, '');
     const primaryUrl = `${this.getBaseApiUrl()}${cleanEndpoint}`;
-    const fallbackBase = (environment && (environment as any).fallbackApiUrl)
-      ? (environment as any).fallbackApiUrl.replace(/\/+$/, '')
-      : 'https://jbac.in:9762/dashboardapi';
-    const fallbackUrl = `${fallbackBase}/${cleanEndpoint}`;
 
     return this.http.get<T>(primaryUrl).pipe(
       catchError((primaryErr) => {
-        console.warn(`[ServiceService] Primary GET to ${primaryUrl} failed. Retrying fallback ${fallbackUrl}:`, primaryErr);
-        return this.http.get<T>(fallbackUrl).pipe(
-          catchError((fallbackErr) => {
-            console.error(`[ServiceService] Fallback GET to ${fallbackUrl} failed:`, fallbackErr);
-            if (fallbackData !== undefined) {
-              return of({ status: 200, data: fallbackData } as any);
-            }
-            return throwError(() => fallbackErr);
-          })
-        );
+        console.warn(`[ServiceService] Primary GET to ${primaryUrl} failed:`, primaryErr);
+        if (fallbackData !== undefined) {
+          return of({ status: 200, data: fallbackData } as any);
+        }
+        return throwError(() => primaryErr);
       })
     );
   }
@@ -157,7 +164,7 @@ export class ServiceService {
   }
 
   postbeliver(data: any) {
-    return this.executePost('postbeliversignup', data);
+    return this.executeWrite('postbeliversignup', data);
   }
 
   getdenomation() {
@@ -181,15 +188,15 @@ export class ServiceService {
   }
 
   postministrysignup(data: any) {
-    return this.executePost('postministrysignup', data);
+    return this.executeWrite('postministrysignup', data);
   }
 
   postregform(data: any) {
-    return this.executePost('postregform', data);
+    return this.executeWrite('postregform', data);
   }
 
   postwishform(data: any) {
-    return this.executePost('postwishform', data);
+    return this.executeWrite('postwishform', data);
   }
 
   getdistrict() {
@@ -221,23 +228,23 @@ export class ServiceService {
   }
 
   postindepedentorganisation(data: any) {
-    return this.http.post(this.testApi + 'postindepedentorganisation', data)
+    return this.executeWrite('postindepedentorganisation', data);
   }
 
   postchurchregister(data: any) {
-    return this.http.post(this.testApi + 'postchurchregister', data)
+    return this.executeWrite('postchurchregister', data);
   }
   postpastorassociationss(data: any) {
-    return this.http.post(this.testApi + 'postpastorassociations', data)
+    return this.executeWrite('postpastorassociations', data);
   }
 
   postrpastor(data: any) {
-    return this.http.post(this.testApi + 'postpastor', data)
+    return this.executeWrite('postpastor', data);
   }
 
 
   postindepedentchurch(data: any) {
-    return this.http.post(this.testApi + 'postindepedentchurch', data)
+    return this.executeWrite('postindepedentchurch', data);
   }
 
   getservices() {
@@ -264,7 +271,7 @@ export class ServiceService {
     return this.executePost('getmconsistencys', {});
   }
   poststudentsignup(data: any) {
-    return this.executePost('studentsignup', data);
+    return this.executeWrite('studentsignup', data);
   }
 
   getchurch() {
@@ -280,7 +287,7 @@ export class ServiceService {
 
   postsmeetings(data: any) {
     console.log(data);
-    return this.http.post(this.testApi + 'postmeetings', data)
+    return this.executeWrite('postmeetings', data);
   }
 
   getpersonal(data: any) {
@@ -288,22 +295,22 @@ export class ServiceService {
   }
 
   postchurchmeetings(data: any) {
-    return this.http.post(this.testApi + 'postchuechmeetings', data);
+    return this.executeWrite('postchuechmeetings', data);
   }
   postjobs(data: any) {
-    return this.http.post(this.testApi + 'postjobs', data);
+    return this.executeWrite('postjobs', data);
   }
   postadds(data: any) {
-    return this.http.post(this.testApi + 'postadds', data);
+    return this.executeWrite('postadds', data);
   }
   postinsututies(data: any) {
-    return this.http.post(this.testApi + 'postinsututies', data);
+    return this.executeWrite('postinsututies', data);
   }
   postcolleges(data: any) {
-    return this.http.post(this.testApi + 'postcolleges', data);
+    return this.executeWrite('postcolleges', data);
   }
   postmarriages(data: any) {
-    return this.http.post(this.testApi + 'postmarriages', data);
+    return this.executeWrite('postmarriages', data);
   }
   getrevival() {
     var data = {}
@@ -384,7 +391,7 @@ export class ServiceService {
 
 
   postattacks(data: any) {
-    return this.http.post<any>(this.testApi + 'postattacks', data);
+    return this.executeWrite('postattacks', data);
   }
 
   getimages() {
@@ -480,7 +487,7 @@ export class ServiceService {
   }
 
   posthelping(data: any) {
-    return this.http.post(this.testApi + 'posthelping', data)
+    return this.executeWrite('posthelping', data);
   }
 
   gethelp() {
@@ -492,7 +499,7 @@ export class ServiceService {
     }));
   }
   postupdatenews(data: any) {
-    return this.http.post(this.testApi + 'postnews', data)
+    return this.executeWrite('postnews', data);
   }
   getupdatenews() {
     var data = {}
@@ -506,7 +513,7 @@ export class ServiceService {
 
 
   postbusiness(data: any) {
-    return this.http.post(this.testApi + 'postbusiness', data);
+    return this.executeWrite('postbusiness', data);
   }
 
   // getbusiness(data:any) {

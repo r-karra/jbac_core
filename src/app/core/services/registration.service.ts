@@ -16,11 +16,30 @@ export class RegistrationService {
    * @param formData The raw input data object from the user form layout
    */
   public submitRegistration(registrationType: string, formData: any): Observable<any> {
-    const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
-    const baseUrl = isHttps ? '' : (environment.apiUrl || '');
+    let baseUrl = '';
+    if (typeof window !== 'undefined' && window.localStorage) {
+      const customApi = window.localStorage.getItem('JBAC_API_URL');
+      if (customApi) {
+        baseUrl = customApi.replace(/\/+$/, '');
+      }
+    }
+
+    if (!baseUrl) {
+      const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
+      if (isHttps) {
+        if (environment && environment.apiUrl && environment.apiUrl.startsWith('https:')) {
+          baseUrl = environment.apiUrl.replace(/\/+$/, '');
+        } else {
+          baseUrl = '';
+        }
+      } else {
+        baseUrl = environment.apiUrl ? environment.apiUrl.replace(/\/+$/, '') : '';
+      }
+    }
+
     const endpoint = `${baseUrl}/api/register-member`;
 
-    // We package the type along with the data so the backend can tell who is registering
+    // Package the role along with the form fields for unified ingestion
     const payload = {
       roleType: registrationType,
       ...formData

@@ -705,26 +705,47 @@ export class ChurchregisterComponent {
     const repwd = (formValue.retypepassword || '').trim();
     if (this.churchregsiterform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
+      this.submitted = false;
       return;
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
+      this.submitted = false;
     }
     else {
-      this.service.postchurchregister({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
-        } else if (res.status == 200) {
-          Swal.fire('Your Church is Submited Successfully,Please Submit your Church Service Timings')
-          this.router.navigate(['/profile'], { queryParams: { id: "1" } });
-          this.churchregsiterform.reset();
+      this.service.postchurchregister({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+        (res: any) => {
           this.submitted = false;
-        }
-      },
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('Your Church is Submited Successfully,Please Submit your Church Service Timings');
+            this.router.navigate(['/profile'], { queryParams: { id: "1" } });
+            this.churchregsiterform.reset();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+            });
+          }
+        },
         error => {
-        })
+          this.submitted = false;
+          console.error('[ChurchRegister] Error:', error);
+          const isMixedContent = error?.status === 0;
+          const msg = isMixedContent
+            ? 'సర్వర్ కనెక్షన్ బ్లాక్ చేయబడింది (HTTPS/HTTP Mixed Content). దయచేసి బ్యాకెండ్‌ను క్లౌడ్‌ఫ్రంట్ (HTTPS) ద్వారా అనుసంధానించండి.'
+            : (error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి');
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: msg
+          });
+        }
+      );
     }
-
   }
+
   postpastorassociations() {
     this.submitted = true;
     const formValue = this.pastorsassociations.value;
@@ -732,22 +753,43 @@ export class ChurchregisterComponent {
     const repwd = (formValue.retypepassword || '').trim();
     if (this.pastorsassociations.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
+      this.submitted = false;
       return;
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
+      this.submitted = false;
     }
     else {
-      this.service.postpastorassociationss({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
-        } else if (res.status == 200) {
-          Swal.fire('Submited Successfully')
-          this.pastorsassociations.reset();
+      this.service.postpastorassociationss({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+        (res: any) => {
           this.submitted = false;
-        }
-      },
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('Submited Successfully');
+            this.pastorsassociations.reset();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+            });
+          }
+        },
         error => {
-        })
+          this.submitted = false;
+          console.error('[PastorAssociations] Error:', error);
+          const isMixedContent = error?.status === 0;
+          const msg = isMixedContent
+            ? 'సర్వర్ కనెక్షన్ బ్లాక్ చేయబడింది (HTTPS/HTTP Mixed Content).'
+            : (error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి');
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: msg
+          });
+        }
+      );
     }
   }
 
@@ -756,31 +798,45 @@ export class ChurchregisterComponent {
     const formValue = this.pastorform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
-    // this.showSpinner = true;
     if (this.pastorform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
+      this.submitted = false;
       return;
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
-      // this.showSpinner = false;
+      this.submitted = false;
     } else {
-      this.service.postrpastor({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
-          // this.showSpinner = false;
-        } else if (res.status == 200) {
-          // this.showSpinner = false;
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు')
-          this.pastorform.reset();
-        } else {
-          alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి')
-        }
-      },
+      this.service.postrpastor({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+        (res: any) => {
+          this.submitted = false;
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
+            this.pastorform.reset();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+            });
+          }
+        },
         error => {
-          // this.showSpinner = false;
-        })
+          this.submitted = false;
+          console.error('[PastorSignup] Error:', error);
+          const isMixedContent = error?.status === 0;
+          const msg = isMixedContent
+            ? 'సర్వర్ కనెక్షన్ బ్లాక్ చేయబడింది (HTTPS/HTTP Mixed Content).'
+            : (error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి');
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: msg
+          });
+        }
+      );
     }
-
   }
 
   // Image Upload Function //
@@ -799,30 +855,41 @@ export class ChurchregisterComponent {
   }
 
   postindepedentchurched() {
-    // this.showSpinner = true;
     this.submitted = true;
     if (this.independentchurchform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
-    }   else {
-      this.independentchurchform.value.church_img = this.imagedata
-      this.service.postindepedentchurch(this.independentchurchform.value).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
-        } else if (res.status == 200) {
-          // this.showSpinner = false;
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
-          this.independentchurchform.reset();
-          this.imagedata = [];
+      this.submitted = false;
+      return;
+    } else {
+      this.independentchurchform.value.church_img = this.imagedata;
+      this.service.postindepedentchurch(this.independentchurchform.value).subscribe(
+        (res: any) => {
           this.submitted = false;
-          // this.showSpinner = false;
-        } else {
-          alert('Error');
-        }
-      },
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
+            this.independentchurchform.reset();
+            this.imagedata = [];
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'Error'
+            });
+          }
+        },
         error => {
-        })
+          this.submitted = false;
+          console.error('[IndependentChurch] Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+          });
+        }
+      );
     }
-    // this.showSpinner = false;
   }
 
   poststudentsignup() {
@@ -833,26 +900,43 @@ export class ChurchregisterComponent {
     const repwd = (formValue.retypepassword || '').trim();
     if (this.studentform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
+      this.showSpinner = false;
+      this.submitted = false;
+      return;
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
+      this.showSpinner = false;
+      this.submitted = false;
+      return;
     } else {
-      this.service.poststudentsignup({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
-        if (res.status == 451) {
-          Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
-        } else if (res.status == 200) {
+      this.service.poststudentsignup({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+        (res: any) => {
           this.showSpinner = false;
-          Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు')
-          this.studentform.reset();
           this.submitted = false;
-          this.showSpinner = false;
-        } else {
-          alert('సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నిచండి')
-        }
-      },
+          if (res.status == 451) {
+            Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
+          } else if (res.status == 200) {
+            Swal.fire('విజయవంతముగా నమోదు చేయబడింది, మీ ఫోన్ నెంబర్ మరియు పాస్వర్డ్ తో లాగిన్ అవగలరు');
+            this.studentform.reset();
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'నమోదు విఫలమైంది',
+              text: res.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+            });
+          }
+        },
         error => {
-        })
-    }
-    this.showSpinner = false;
+          this.showSpinner = false;
+          this.submitted = false;
+          console.error('[StudentSignup] Error:', error);
+          Swal.fire({
+            icon: 'error',
+            title: 'కనెక్షన్ లోపం',
+            text: error?.error?.error || error?.message || 'సర్వర్ డౌన్ వుంది, దయచేసి తరువాత ప్రయత్నించండి'
+          });
+        }
+      );
   }
   church: any;
   pastor: any;
