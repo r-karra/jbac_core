@@ -58,17 +58,6 @@ export class ApiInterceptor implements HttpInterceptor {
         const path = modifiedUrl.replace(/^http:\/\/[^/]+/, '');
         modifiedUrl = `${activeHttpsBackend}${path}`;
       }
-    } else if (isHttps && modifiedUrl.startsWith('http://')) {
-      // Running on HTTPS (AWS Amplify) with an HTTP backend:
-      // Browser blocks direct HTTP as Mixed Content.
-      // Route via relative path so reverse proxy can handle it if configured
-      if (modifiedUrl.includes('/dashboardapi/')) {
-        modifiedUrl = modifiedUrl.substring(modifiedUrl.indexOf('/dashboardapi/'));
-      } else if (modifiedUrl.includes('/api/')) {
-        modifiedUrl = modifiedUrl.substring(modifiedUrl.indexOf('/api/'));
-      } else if (modifiedUrl.includes('/register-member')) {
-        modifiedUrl = '/api/register-member';
-      }
     }
 
     const clonedRequest = request.clone({ url: modifiedUrl });

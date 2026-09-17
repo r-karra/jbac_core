@@ -12,6 +12,19 @@ import {
   FALLBACK_PATTERNS
 } from './fallback-data';
 
+if (typeof window !== 'undefined') {
+  (window as any).setJbacApi = (url?: string) => {
+    if (!url) {
+      localStorage.removeItem('JBAC_API_URL');
+      console.log('[JBAC] Reset API URL to default');
+    } else {
+      localStorage.setItem('JBAC_API_URL', url.trim());
+      console.log('[JBAC] API URL set to:', url.trim());
+    }
+    location.reload();
+  };
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,7 +36,7 @@ export class ServiceService {
   }
 
   getBaseApiUrl(): string {
-    // Check for runtime configured API URL (e.g. AWS CloudFront HTTPS endpoint stored in localStorage)
+    // 1. Check for runtime configured API URL (e.g. AWS CloudFront HTTPS endpoint stored in localStorage)
     if (typeof window !== 'undefined' && window.localStorage) {
       const customApi = window.localStorage.getItem('JBAC_API_URL');
       if (customApi) {
@@ -31,20 +44,12 @@ export class ServiceService {
       }
     }
 
-    if (typeof window !== 'undefined' && window.location && window.location.protocol === 'https:') {
-      // Running on HTTPS (e.g. AWS Amplify)
-      // If a full HTTPS apiUrl is configured in environment, use it
-      if (environment && environment.apiUrl && environment.apiUrl.startsWith('https:')) {
-        return `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`;
-      }
-      // Otherwise route via relative /dashboardapi/
-      return '/dashboardapi/';
-    }
-
-    // Running on HTTP (e.g. localhost dev)
+    // 2. Use configured environment apiUrl (CloudFront HTTPS or Elastic Beanstalk)
     if (environment && environment.apiUrl) {
       return `${environment.apiUrl.replace(/\/+$/, '')}/dashboardapi/`;
     }
+
+    // 3. Direct Elastic Beanstalk fallback
     return 'http://jbac-backend-env.eba-rdpqwigp.ap-southeast-2.elasticbeanstalk.com/dashboardapi/';
   }
 

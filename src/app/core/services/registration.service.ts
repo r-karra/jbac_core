@@ -25,16 +25,7 @@ export class RegistrationService {
     }
 
     if (!baseUrl) {
-      const isHttps = typeof window !== 'undefined' && window.location && window.location.protocol === 'https:';
-      if (isHttps) {
-        if (environment && environment.apiUrl && environment.apiUrl.startsWith('https:')) {
-          baseUrl = environment.apiUrl.replace(/\/+$/, '');
-        } else {
-          baseUrl = '';
-        }
-      } else {
-        baseUrl = environment.apiUrl ? environment.apiUrl.replace(/\/+$/, '') : '';
-      }
+      baseUrl = environment.apiUrl ? environment.apiUrl.replace(/\/+$/, '') : 'http://jbac-backend-env.eba-rdpqwigp.ap-southeast-2.elasticbeanstalk.com';
     }
 
     const endpoint = `${baseUrl}/api/register-member`;
