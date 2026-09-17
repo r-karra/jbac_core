@@ -937,6 +937,7 @@ export class ChurchregisterComponent {
           });
         }
       );
+    }
   }
   church: any;
   pastor: any;
