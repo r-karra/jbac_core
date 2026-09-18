@@ -231,7 +231,9 @@ export class BelieverregisterComponent {
       Swal.fire("Passwords are Unmatched");
       this.submitted = false;
     } else {
-      this.service.postbeliver({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+      const phone = (formValue.mobile_number || '').trim();
+      const name = `${formValue.fname || ''} ${formValue.lname || ''}`.trim() || formValue.fname;
+      this.service.postbeliver({ ...formValue, mobile_number: phone, name: name, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.submitted = false;
           if (res.status == 451) {

@@ -179,7 +179,9 @@ export class MinistryregisterComponent {
       Swal.fire("Passwords are Unmatched");
       this.submitted = false;
     } else {
-      this.service.postministrysignup({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+      const phone = (formValue.headnmber || '').trim();
+      const name = (formValue.firstname || '').trim();
+      this.service.postministrysignup({ ...formValue, mobile_number: phone, headnmber: phone, name: name, firstname: name, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.submitted = false;
           if (res.status == 451) {

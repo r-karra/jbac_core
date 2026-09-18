@@ -544,12 +544,14 @@ export class SignupComponent {
     const formValue = this.beliverform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.phonenumber || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.name || formValue.believername || '').toString().trim();
     if (this.beliverform.invalid) {
       Swal.fire('please fill the details');
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched")
     } else {
-      this.service.postbeliver({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postbeliver({ ...formValue, mobile_number: phone, phonenumber: phone, name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -572,12 +574,14 @@ export class SignupComponent {
     const formValue = this.ministryform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.headnmber || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.ministry_name || formValue.name || '').toString().trim();
     if (this.ministryform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
     } else {
-      this.service.postministrysignup({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postministrysignup({ ...formValue, mobile_number: phone, headnmber: phone, name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -598,6 +602,8 @@ export class SignupComponent {
     const formValue = this.independentorgainsationform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.contact_num || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.organisation_name || formValue.name || '').toString().trim();
 
     if (this.independentorgainsationform.invalid) {
       Swal.fire('please fiil the details ');
@@ -605,7 +611,7 @@ export class SignupComponent {
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
     } else {
-      this.service.postindepedentorganisation({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postindepedentorganisation({ ...formValue, mobile_number: phone, contact_num: phone, name: name, organisation_name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -627,6 +633,8 @@ export class SignupComponent {
     const formValue = this.churchregsiterform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.contactnumber || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.church_name || formValue.name || '').toString().trim();
     if (this.churchregsiterform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
       return;
@@ -634,7 +642,7 @@ export class SignupComponent {
       Swal.fire("Passwords are Unmatched")
     }
     else {
-      this.service.postchurchregister({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postchurchregister({ ...formValue, mobile_number: phone, contactnumber: phone, name: name, church_name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
         } else if (res.status == 200) {
@@ -654,6 +662,8 @@ export class SignupComponent {
     const formValue = this.pastorsassociations.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.phonenumber || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.associations_name || formValue.name || '').toString().trim();
     if (this.pastorsassociations.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
       return;
@@ -661,7 +671,7 @@ export class SignupComponent {
       Swal.fire("Passwords are Unmatched")
     }
     else {
-      this.service.postpastorassociationss({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postpastorassociationss({ ...formValue, mobile_number: phone, phonenumber: phone, name: name, associations_name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
         } else if (res.status == 200) {
@@ -680,6 +690,8 @@ export class SignupComponent {
     const formValue = this.pastorform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.phonenumber || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.pastorname || formValue.name || '').toString().trim();
     // this.showSpinner = true;
     if (this.pastorform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
@@ -688,7 +700,7 @@ export class SignupComponent {
       Swal.fire("Passwords are Unmatched")
       // this.showSpinner = false;
     } else {
-      this.service.postrpastor({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postrpastor({ ...formValue, mobile_number: phone, phonenumber: phone, name: name, pastorname: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు')
           // this.showSpinner = false;
@@ -728,13 +740,15 @@ export class SignupComponent {
     const formValue = this.independentchurchform.value;
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.contactnumber || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.church_name || formValue.name || '').toString().trim();
     if (this.independentchurchform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
     } else {
       this.independentchurchform.value.church_img = this.imagedata
-      this.service.postindepedentchurch({ ...formValue, church_img: this.imagedata, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      this.service.postindepedentchurch({ ...formValue, mobile_number: phone, contactnumber: phone, name: name, church_name: name, church_img: this.imagedata, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -767,6 +781,8 @@ export class SignupComponent {
     const formValue = this.studentform.getRawValue();
     const pwd = (formValue.password || '').trim();
     const repwd = (formValue.retypepassword || '').trim();
+    const phone = (formValue.number || formValue.mobile_number || '').toString().trim();
+    const name = (formValue.studentname || formValue.name || '').toString().trim();
 
     if (pwd !== repwd) {
       this.showSpinner = false;
@@ -775,7 +791,7 @@ export class SignupComponent {
     }
 
     // send trimmed passwords in form to backend
-    const payload = { ...formValue, password: pwd, retypepassword: repwd };
+    const payload = { ...formValue, mobile_number: phone, number: phone, name: name, studentname: name, password: pwd, retypepassword: repwd };
 
     this.service.poststudentsignup(payload).subscribe(
       (res: any) => {

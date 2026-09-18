@@ -54,6 +54,100 @@ export class ServiceService {
   }
 
   /**
+   * Normalizes registration submission payloads so that mobile_number and name
+   * are guaranteed to be populated with clean, trimmed strings regardless of
+   * which form field name was used in the UI (e.g. phonenumber, number, headnmber, contactnumber).
+   * Also ensures role-specific field aliases remain populated so backend entity tables receive them.
+   */
+  normalizeRegistrationPayload(body: any, endpoint?: string): any {
+    if (!body || typeof body !== 'object') return body;
+
+    const payload = { ...body };
+
+    // 1. Resolve mobile number from any possible phone input field
+    const rawMobile =
+      payload.mobile_number ||
+      payload.phonenumber ||
+      payload.number ||
+      payload.headnmber ||
+      payload.contactnumber ||
+      payload.contact_num ||
+      payload.phnumber ||
+      payload.phone ||
+      '';
+
+    const cleanMobile = typeof rawMobile === 'string' ? rawMobile.trim() : String(rawMobile || '').trim();
+
+    if (cleanMobile) {
+      payload.mobile_number = cleanMobile;
+      // Populate aliases so backend table-specific columns receive the phone number
+      if (!payload.phonenumber) payload.phonenumber = cleanMobile;
+      if (!payload.number) payload.number = cleanMobile;
+      if (!payload.headnmber) payload.headnmber = cleanMobile;
+      if (!payload.contactnumber) payload.contactnumber = cleanMobile;
+      if (!payload.contact_num) payload.contact_num = cleanMobile;
+      if (!payload.phnumber) payload.phnumber = cleanMobile;
+    }
+
+    // 2. Resolve user's full name from any possible name input field
+    const rawName =
+      payload.name ||
+      payload.pastorname ||
+      payload.studentname ||
+      payload.firstname ||
+      payload.fname ||
+      payload.church_name ||
+      payload.churchname ||
+      payload.organisation_name ||
+      payload.pa_name ||
+      '';
+
+    let cleanName = typeof rawName === 'string' ? rawName.trim() : String(rawName || '').trim();
+    if (payload.fname && payload.lname && !payload.name) {
+      const combined = `${payload.fname || ''} ${payload.lname || ''}`.trim();
+      if (combined) cleanName = combined;
+    }
+
+    if (cleanName) {
+      payload.name = cleanName;
+      if (!payload.pastorname) payload.pastorname = cleanName;
+      if (!payload.studentname) payload.studentname = cleanName;
+      if (!payload.firstname) payload.firstname = cleanName;
+      if (!payload.fname) payload.fname = cleanName;
+    }
+
+    // 3. Trim password if present
+    if (payload.password && typeof payload.password === 'string') {
+      payload.password = payload.password.trim();
+    }
+    if (payload.retypepassword && typeof payload.retypepassword === 'string') {
+      payload.retypepassword = payload.retypepassword.trim();
+    }
+
+    // 4. Map category ID if endpoint is known and category is not provided
+    if (!payload.category && endpoint) {
+      const ep = endpoint.toLowerCase();
+      if (ep.includes('beliver')) {
+        payload.category = 1;
+      } else if (ep.includes('student')) {
+        payload.category = 2;
+      } else if (ep.includes('ministry')) {
+        payload.category = 3;
+      } else if (ep.includes('pastor') && !ep.includes('association')) {
+        payload.category = 4;
+      } else if (ep.includes('church')) {
+        payload.category = 5;
+      } else if (ep.includes('organisation') || ep.includes('organization')) {
+        payload.category = 6;
+      } else if (ep.includes('association')) {
+        payload.category = 7;
+      }
+    }
+
+    return payload;
+  }
+
+  /**
    * Dedicated write/mutation executor for registrations and user submissions.
    * STRICT SECURITY GUARANTEE: Never redirects or falls back to third-party legacy servers!
    * Ensures data ONLY lands in the user's AWS Aurora RDS database.
@@ -61,8 +155,9 @@ export class ServiceService {
   executeWrite<T = any>(endpoint: string, body: any = {}): Observable<T> {
     const cleanEndpoint = endpoint.replace(/^\/+/, '');
     const primaryUrl = `${this.getBaseApiUrl()}${cleanEndpoint}`;
+    const payload = this.normalizeRegistrationPayload(body, cleanEndpoint);
 
-    return this.http.post<T>(primaryUrl, body).pipe(
+    return this.http.post<T>(primaryUrl, payload).pipe(
       catchError((primaryErr) => {
         console.error(`[ServiceService] Registration/Write operation to ${primaryUrl} failed:`, primaryErr);
         return throwError(() => primaryErr);
@@ -156,11 +251,18 @@ export class ServiceService {
   }
 
   postsignup(data: any) {
-    return this.executePost('postwebsitesignup', data);
+    return this.executeWrite('postwebsitesignup', data);
   }
 
   passwordlogin(data: any) {
-    return this.executePost('passwordwebsitelogin', data);
+    const payload = { ...data };
+    if (payload.mobile_number && typeof payload.mobile_number === 'string') {
+      payload.mobile_number = payload.mobile_number.trim();
+    }
+    if (payload.password && typeof payload.password === 'string') {
+      payload.password = payload.password.trim();
+    }
+    return this.executePost('passwordwebsitelogin', payload);
   }
 
   getevents() {

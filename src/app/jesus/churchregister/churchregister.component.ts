@@ -625,7 +625,9 @@ export class ChurchregisterComponent {
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
     } else {
-      this.service.postbeliver({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      const phone = (formValue.mobile_number || '').trim();
+      const name = `${formValue.fname || ''} ${formValue.lname || ''}`.trim() || formValue.fname;
+      this.service.postbeliver({ ...formValue, mobile_number: phone, name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -653,7 +655,9 @@ export class ChurchregisterComponent {
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
     } else {
-      this.service.postministrysignup({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      const phone = (formValue.headnmber || '').trim();
+      const name = (formValue.firstname || '').trim();
+      this.service.postministrysignup({ ...formValue, mobile_number: phone, headnmber: phone, name: name, firstname: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -681,7 +685,9 @@ export class ChurchregisterComponent {
     } else if (pwd !== repwd) {
       Swal.fire("Passwords are Unmatched");
     } else {
-      this.service.postindepedentorganisation({ ...formValue, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
+      const phone = (formValue.contact_num || '').trim();
+      const name = (formValue.organisation_name || '').trim();
+      this.service.postindepedentorganisation({ ...formValue, mobile_number: phone, contact_num: phone, name: name, organisation_name: name, password: pwd, retypepassword: repwd }).subscribe((res: any) => {
         if (res.status == 451) {
           Swal.fire('ఇదే ఫోన్ నెంబర్ తో ఇంతకుముందే రిజిస్టర్ అయ్యారు');
         } else if (res.status == 200) {
@@ -712,7 +718,9 @@ export class ChurchregisterComponent {
       this.submitted = false;
     }
     else {
-      this.service.postchurchregister({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+      const phone = (formValue.contactnumber || '').trim();
+      const name = (formValue.church_name || '').trim();
+      this.service.postchurchregister({ ...formValue, mobile_number: phone, contactnumber: phone, name: name, church_name: name, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.submitted = false;
           if (res.status == 451) {
@@ -760,7 +768,9 @@ export class ChurchregisterComponent {
       this.submitted = false;
     }
     else {
-      this.service.postpastorassociationss({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+      const phone = (formValue.phonenumber || '').trim();
+      const name = (formValue.pa_name || '').trim();
+      this.service.postpastorassociationss({ ...formValue, mobile_number: phone, phonenumber: phone, name: name, pa_name: name, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.submitted = false;
           if (res.status == 451) {
@@ -806,7 +816,9 @@ export class ChurchregisterComponent {
       Swal.fire("Passwords are Unmatched");
       this.submitted = false;
     } else {
-      this.service.postrpastor({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+      const phone = (formValue.phonenumber || '').trim();
+      const name = (formValue.pastorname || '').trim();
+      this.service.postrpastor({ ...formValue, mobile_number: phone, phonenumber: phone, name: name, pastorname: name, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.submitted = false;
           if (res.status == 451) {
@@ -856,13 +868,22 @@ export class ChurchregisterComponent {
 
   postindepedentchurched() {
     this.submitted = true;
+    const formValue = this.independentchurchform.value;
+    const pwd = (formValue.password || '').trim();
+    const repwd = (formValue.retypepassword || '').trim();
     if (this.independentchurchform.invalid) {
       Swal.fire('* ఉన్న తప్పనిసరి  ఫీల్డ్స్ ఎంటర్ చేయండి');
       this.submitted = false;
       return;
+    } else if (pwd !== repwd) {
+      Swal.fire("Passwords are Unmatched");
+      this.submitted = false;
+      return;
     } else {
+      const phone = (formValue.contactnumber || '').trim();
+      const name = (formValue.churchname || '').trim();
       this.independentchurchform.value.church_img = this.imagedata;
-      this.service.postindepedentchurch(this.independentchurchform.value).subscribe(
+      this.service.postindepedentchurch({ ...formValue, mobile_number: phone, contactnumber: phone, name: name, churchname: name, church_img: this.imagedata, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.submitted = false;
           if (res.status == 451) {
@@ -909,7 +930,9 @@ export class ChurchregisterComponent {
       this.submitted = false;
       return;
     } else {
-      this.service.poststudentsignup({ ...formValue, password: pwd, retypepassword: repwd }).subscribe(
+      const phone = (formValue.number || '').trim();
+      const name = (formValue.studentname || '').trim();
+      this.service.poststudentsignup({ ...formValue, mobile_number: phone, number: phone, name: name, studentname: name, password: pwd, retypepassword: repwd }).subscribe(
         (res: any) => {
           this.showSpinner = false;
           this.submitted = false;

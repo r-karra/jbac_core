@@ -620,8 +620,18 @@ export class StudentregisterComponent {
       return;
     }
     
-    // Send the entire form value like other registration forms do
-    const payload = { ...formValue, password: pwd, retypepassword: repwd };
+    // Send the entire form value with mobile_number and name populated
+    const phone = (formValue.number || '').trim();
+    const name = (formValue.studentname || '').trim();
+    const payload = {
+      ...formValue,
+      mobile_number: phone,
+      number: phone,
+      name: name,
+      studentname: name,
+      password: pwd,
+      retypepassword: repwd
+    };
     this.service.poststudentsignup(payload)
       .pipe(finalize(() => this.showSpinner = false)) // Ensures spinner is hidden no matter what
       .subscribe(

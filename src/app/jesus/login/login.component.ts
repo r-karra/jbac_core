@@ -51,7 +51,15 @@ export class LoginComponent {
       this.showSpinner = false;
       return;
     } else {
-      this.service.passwordlogin(this.passwordform.value).subscribe((res: any) => {
+      const formVal = this.passwordform.value;
+      const cleanMobile = (formVal.mobile_number || '').toString().trim();
+      const cleanPassword = (formVal.password || '').toString().trim();
+      const payload = {
+        ...formVal,
+        mobile_number: cleanMobile,
+        password: cleanPassword
+      };
+      this.service.passwordlogin(payload).subscribe((res: any) => {
         this.showSpinner = false;
         console.log(40, res);
         if (res.status == 250) {
@@ -61,7 +69,7 @@ export class LoginComponent {
         } else {
           Swal.fire('Login Success...')
           sessionStorage.setItem('usr_id', res.data[0].id);
-          sessionStorage.setItem('mobile_number', this.passwordform.value.mobile_number);
+          sessionStorage.setItem('mobile_number', cleanMobile);
           sessionStorage.setItem('name', res.data[0].name);
           sessionStorage.setItem('category_id', this.passwordform.value.category);
           sessionStorage.setItem('auth_ind', "1");
